@@ -70,9 +70,8 @@ function checkVideoAddress(url: string): void {
   if (parsed.protocol !== "https:") {
     abort("VIDEO.json url must use https");
   }
-  const hostOk = parsed.hostname === "www.tiktok.com" ||
-    parsed.hostname === "m.tiktok.com" ||
-    parsed.hostname === "tiktok.com";
+  const allowedHosts = ["www.tiktok.com", "m.tiktok.com", "tiktok.com"];
+  const hostOk = allowedHosts.includes(parsed.hostname);
   if (!hostOk) {
     abort("VIDEO.json url must point at tiktok.com");
   }
