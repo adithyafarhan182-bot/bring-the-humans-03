@@ -1,20 +1,20 @@
-// bring-the-humans-03 — video 3 entry (Node 22, standard library only).
+// bring-the-humans-03 — video 4 entry (Node 22, standard library only).
 //
-// The entry IS the TikTok video: an original ~20 s vertical ad for
-// make.fun, made by the agent in its recorded session — an emotion-driven,
-// violation-safe Indonesian ad. It opens with a question a viewer
-// recognises, shows AI agents creating and competing on make.fun, invites
-// the viewer to enter their own agent, and ends on the press pack's
-// referral end card carrying the account's own referral code. The
-// press-pack brand badge sits on screen from the video's first frame until
-// the end card. The video is posted publicly on TikTok by the person the
-// agent works for; VIDEO.json names the posted video and the house reads
-// its views from TikTok.
+// The entry IS the TikTok video: an original ~20 s vertical pixel-art
+// platformer ad for make.fun, made by the agent in its recorded session.
+// A little pixel ghost runs and jumps through a dusk-violet world,
+// collecting coins, while calm on-screen lines say what make.fun is —
+// AI agents play, build and compete there — and invite the viewer to join
+// them. No voiceover, no money figures on screen, no hype. The press-pack
+// brand badge sits on screen from the video's first frame until the end
+// card, which carries the account's own referral code. The video is
+// posted publicly on TikTok by the person the agent works for; VIDEO.json
+// names the posted video and the house reads its views from TikTok.
 //
-// This program does one job: take VIDEO.json from the repository, check
-// it names a TikTok video address, and hand that same address to the
-// output directory where the gate reads it. Nothing else it writes is
-// scored.
+// This program has a single responsibility: read VIDEO.json out of the
+// repository, confirm it points at a real TikTok video address, and copy
+// that same address into the output directory for the gate. Nothing else
+// it writes is scored.
 //
 // Run it the way the grader does (outside the grader's container):
 //   mkdir -p out && MAKEFUN_BOT_DIR=. MAKEFUN_OUTPUT_DIR=out node main.ts
@@ -25,44 +25,68 @@ import { join } from "node:path";
 const botDir = process.env.MAKEFUN_BOT_DIR ?? "/bot";
 const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 
-function fail(message: string): never {
-  console.error(`video 3 entry: ${message}`);
+function abort(reason: string): never {
+  console.error(`video 4 entry: ${reason}`);
   process.exit(1);
 }
 
-function readVideoJson(): { url: string } {
-  const path = join(botDir, "VIDEO.json");
-  let text: string;
+function loadEntry(): { url: string } {
+  const videoPath = join(botDir, "VIDEO.json");
+  let raw: string;
   try {
-    text = readFileSync(path, "utf8");
-  } catch (error) {
-    fail(`cannot read ${path} (${(error as Error).message})`);
+    raw = readFileSync(videoPath, "utf8");
+  } catch (err) {
+    abort(`could not read ${videoPath}: ${(err as Error).message}`);
   }
-  let parsed: unknown;
+  let data: unknown;
   try {
-    parsed = JSON.parse(text!);
-  } catch (error) {
-    fail(`VIDEO.json is not valid JSON (${(error as Error).message})`);
+    data = JSON.parse(raw!);
+  } catch (err) {
+    abort(`VIDEO.json is not valid JSON: ${(err as Error).message}`);
   }
-  if (typeof parsed !== "object" || parsed === null) {
-    fail("VIDEO.json must be a JSON object");
+  if (typeof data !== "object" || data === null || Array.isArray(data)) {
+    abort("VIDEO.json must be a JSON object with a url field");
   }
-  const url = (parsed as { url?: unknown }).url;
-  if (typeof url !== "string" || url.trim().length === 0) {
-    fail("VIDEO.json must carry a non-empty string url");
+  const url = (data as Record<string, unknown>).url;
+  if (typeof url !== "string" || url.trim() === "") {
+    abort("VIDEO.json url must be a non-empty string");
   }
-  // Accepted shapes (the gate's own rule): the full browser address of a
-  // TikTok video — https://www.tiktok.com/@<handle>/video/<digits> — or
-  // the mobile host variant. Short links (vm.tiktok.com, vt.tiktok.com,
-  // tiktok.com/t/...) and photo posts (/photo/<id>) are refused by the
-  // gate, so they fail here first, loudly, instead of at submission.
-  if (!/^https:\/\/(www\.|m\.)?tiktok\.com\/@[^/]+\/video\/\d+/.test(url)) {
-    fail("VIDEO.json url must be a TikTok video address");
-  }
+  checkVideoAddress(url.trim());
   return { url: url.trim() };
 }
 
-const entry = readVideoJson();
+function checkVideoAddress(url: string): void {
+  // The gate only accepts the full browser address of a TikTok video:
+  // https://www.tiktok.com/@<handle>/video/<digits> (or the m.tiktok.com
+  // host). Short links (vm.tiktok.com, vt.tiktok.com, tiktok.com/t/...)
+  // and photo posts (/photo/<id>) are refused, so reject them here with
+  // a clear message instead of letting the gate refuse them later.
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    abort(`VIDEO.json url is not a valid URL: ${url}`);
+  }
+  if (parsed.protocol !== "https:") {
+    abort("VIDEO.json url must use https");
+  }
+  const hostOk = parsed.hostname === "www.tiktok.com" ||
+    parsed.hostname === "m.tiktok.com" ||
+    parsed.hostname === "tiktok.com";
+  if (!hostOk) {
+    abort("VIDEO.json url must point at tiktok.com");
+  }
+  const parts = parsed.pathname.split("/").filter((p) => p.length > 0);
+  const shapeOk = parts.length === 3 &&
+    parts[0].startsWith("@") &&
+    parts[1] === "video" &&
+    /^\d+$/.test(parts[2]);
+  if (!shapeOk) {
+    abort("VIDEO.json url must look like /@handle/video/<digits>");
+  }
+}
+
+const entry = loadEntry();
 mkdirSync(outDir, { recursive: true });
 writeFileSync(
   join(outDir, "VIDEO.json"),
