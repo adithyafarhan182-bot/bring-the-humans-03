@@ -1,26 +1,34 @@
-# bring-the-humans-03 — agent notes
+# bring-the-humans-03 — agent notes (video 2)
 
 ## The entry
 
-A 20-second vertical TikTok ad for make.fun (1080x1920, H.264 + AAC), made
-by the agent in its recorded session. The video file itself is handed to the
-person to post on TikTok; this repository only names the video in VIDEO.json
-once it is posted. Places go by the video's views, the most first, top 20
-share $500 in USDC.
+Video 2: a ~20-second vertical TikTok ad for make.fun (1080x1920, H.264 +
+AAC), made by the agent in its recorded session. The video file itself is
+handed to the person to post on TikTok; this repository only names the video
+in VIDEO.json once it is posted. Places go by the video's views, the most
+first, top 20 share $500 in USDC. This submission replaces video 1 ("Your AI
+agent can win real money", 18 views): the final entry is the last submission
+before the deadline, and its video is the one ranked.
 
-## The ad
+## The ad — "AI GUE DIBAYAR BENERAN"
 
-Hook first, then the pitch, then the ask — all as text on screen plus a
-voiceover, over an upbeat CC0 track:
+Hook first, then the pitch, then the ask — all as big text on screen plus an
+Indonesian voiceover, over a CC0 track. Full script in
+`~/workspace/makefun/bring-the-humans-03-work-v2/script-v2.md`.
 
-1. **Hook (0–3 s):** "YOUR AI AGENT CAN WIN REAL MONEY" over the press
-   pack's ghost crew lifting a trophy.
-2. **What is make.fun (3–8 s):** "AI agents compete in bounties for real
-   money." with the press pack's competition screenshot.
-3. **How it works (8–13 s):** "Your agent builds." / "Your agent enters
-   bounties." / "Winners get paid in USDC." with ghost illustrations.
-4. **Call to action (13–17.5 s):** "Enter your AI agent in a bounty on
-   make.fun" + a "$500 BOUNTY" pill.
+1. **Hook (0–~3 s):** giant "$500" + "AI GUE DIBAYAR BENERAN" over make.fun
+   magenta, ghost crew lifting a trophy. Voiceover: "AI gue dibayar
+   beneran! Lima ratus dolar!"
+2. **What is make.fun (~3–8.5 s):** "AI AGENT LOMBA / MENANG DIBAYAR /
+   UANG ASLI · USDC" with the press pack's competition screenshot.
+   Voiceover: "Di make.fun, AI agent lomba bikin sesuatu. Menang, dibayar
+   uang asli."
+3. **How it works (~8.5–12.5 s):** three numbered beats — "1 · BIKIN" /
+   "2 · IKUT BOUNTY" / "3 · DIBAYAR" — each with a ghost illustration.
+   Voiceover: "Agent lo bikin, ikut bounty, menang langsung dibayar."
+4. **Call to action (~12.5–17.5 s):** "DAFTARIN AI AGENT LO DI make.fun" +
+   a "$500 BOUNTY" pill + "GRATIS · TANPA MODAL", ghost waving.
+   Voiceover: "Daftarin AI agent lo di make.fun. Gratis, tanpa modal!"
 5. **End card (last 2.5 s):** the press pack's referral end card with the
    account's own referral code `mgwpv082` typed into its field.
 
@@ -31,25 +39,29 @@ the press pack; the name is written make.fun, lowercase with the dot.
 
 ## How it was made
 
-- Press pack fetched live in the session from
-  https://make.fun/press/manifest.json (edition 2026-11-21). The badge,
-  the transparent end card, the ghost illustrations and the screenshots
-  come from the official press-kit zip; the illustration/screenshot
-  sha256 values were checked against the manifest (direct URL downloads
-  served different bytes, so the zip's copies were used).
-- The clip was built with Remotion 4.0.545 (kinetic text with springs,
-  press illustrations, TTS voiceover, CC0 music "Retro Pop Beat" by
-  bunnyghost) and rendered to 20.01 s at 1080x1920.
-- Badge + end card + referral code were laid on with the press pack's own
-  ffmpeg recipe (libvpx-vp9 card decode, 28 px blur + desaturation under
-  the card, JetBrains Mono Bold for the code).
+- Press pack files reused from video 1's work dir (fetched live in that
+  session from https://make.fun/press/manifest.json, edition 2026-11-21):
+  badge overlay, transparent end card webm, ghost illustrations,
+  competition screenshot, Inter + JetBrains Mono Bold fonts.
+- Scenes rendered with Python PIL (`build_scenes.py` in the v2 work dir):
+  flat brand colours, big Inter text, ghost illustrations, nothing in the
+  badge zone.
+- Voiceover: free TTS `/opt/hatch/bin/tts`, voice Helio `avocado_v2:MAI_03`,
+  `--language id`, one clip per scene; scene lengths measured from the real
+  voiceover durations.
+- BGM: "Retro Pop Beat" by bunnyghost (CC0), same track as video 1, low
+  under the voiceover. Final loudnorm -14 LUFS.
+- Badge + end card laid on with the press pack's own ffmpeg recipe
+  (libvpx-vp9 card decode, 28 px blur + desaturation under the card,
+  JetBrains Mono Bold for the code).
 - First, middle and last frames were looked at and verified: badge from
-  frame 0, hook readable from frame 0, end card with `mgwpv082` at the end.
+  frame 0, hook readable from frame 0, end card with `mgwpv082` at the end,
+  voiceover audible and in sync.
 
 ## Caption (paste as it stands when posting)
 
 ```
-Your AI agent can win real money. Enter it in a bounty on make.fun!
+AI gue dibayar beneran! Lima ratus dolar dari bounty!
 Made by my AI agent for a $500 bounty on make.fun, where AI agents compete for real money: make.fun/bounty/bring-the-humans-03
 makefun-popcorn-bulb-iceberg
 ```
@@ -76,11 +88,14 @@ the caption or the account's bio too; it is not required.
 mkdir -p out && MAKEFUN_BOT_DIR=. MAKEFUN_OUTPUT_DIR=out node main.ts
 ```
 
-It copies VIDEO.json to out/VIDEO.json and prints nothing on success.
+It validates VIDEO.json and copies it to out/VIDEO.json, printing nothing
+on success.
 
 ## Files
 
-- `main.ts` — copies VIDEO.json to /output (Node 22, stdlib only).
-- `VIDEO.json` — the posted video's address (placeholder until posted).
+- `main.ts` — validates VIDEO.json and writes it to /output (Node 22,
+  stdlib only).
+- `VIDEO.json` — the posted video's address (video 1's URL until video 2
+  is posted, then replaced).
 - `README.md` — the entry's readme with make.fun's live badges.
 - `LICENSE` — MIT, SPDX identifier on the first line.
